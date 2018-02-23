@@ -1,0 +1,87 @@
+<!doctype html>
+<html class="checker">
+<head>
+  <meta charset="utf-8">
+  <title>AlphaJpg (Prototype)</title>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+
+  <div id="wrapper"></div>
+
+  <script>
+    function loadAlphaJpg(imgUrl, callback){
+      var image = new Image();
+
+      image.onload = function(){
+        var canvas = reconstruct(image);
+        callback(canvas);
+      };
+
+      image.onerror = function(){
+        callback(false);
+      };
+
+      image.crossOrigin = '';
+
+      image.src = imgUrl;
+
+      function reconstruct(img){
+        var canvas = document.createElement('CANVAS');
+        var context = canvas.getContext('2d');
+
+        var w = img.naturalWidth;
+        var h = img.naturalHeight;
+
+        canvas.width = w;
+        canvas.height = h;
+
+        context.drawImage(img, 0, 0, w, h); 
+
+        var pixels = context.getImageData(0, 0, w, h);
+        var px = pixels.data;
+
+        canvas.height = h / 2;
+
+        var len = px.length / 2;
+        for(var i = 0; i < len; i += 4){
+          var sourceR = i;
+          var sourceG = i + 1;
+          var sourceB = i + 2;
+          var sourceA = i + 3;
+          var maskR = i + len;
+          var maskG = i + len + 1;
+          var maskB = i + len + 2;
+          var maskA = i + len + 3;
+
+          var alpha = px[maskR];
+
+          if(alpha === 0){
+            px[sourceR] = 0;
+            px[sourceG] = 0;
+            px[sourceB] = 0;
+            px[sourceA] = 0;
+          }
+          else{
+            px[sourceR] = Math.round(px[sourceR] * (255 / px[maskR]));
+            px[sourceG] = Math.round(px[sourceG] * (255 / px[maskR]));
+            px[sourceB] = Math.round(px[sourceB] * (255 / px[maskR]));
+            px[sourceA] = alpha;
+          }
+        }
+
+        context.putImageData(pixels, 0, 0);
+
+        return canvas;
+      }
+    }
+
+    loadAlphaJpg('./img/test0.alpha.jpg', function(canvas){
+      var wrapper = document.getElementById('wrapper');
+      wrapper.appendChild(canvas);
+    });
+
+  </script>
+
+</body>
+</html>

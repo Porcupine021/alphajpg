@@ -1,0 +1,106 @@
+<!doctype html>
+<html class="checker">
+<head>
+  <meta charset="utf-8">
+  <title>AlphaJpg (Canvas 2D with Fallbacks)</title>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="./css/prettify.css">
+  <link rel="stylesheet" href="./css/sunburst.css">
+  <link rel="stylesheet" href="./css/screen.css">
+  <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner">
+      <a class="header__back-bttn bttn" href="index.html">Back</a>
+      <a id="about-open" href="javascript:void(0);" class="header__label">Canvas 2D (WebP, PNG & No JS Fallbacks)<span class="header__icon" title="More Info"></span></a>
+      <a id="source-open" class="header__source-bttn bttn" href="javascript:void(0);">View Source</a>
+    </div>
+  </header>
+  <div id="source-code" class="app">
+
+    <div id="myImage" class="preserveAspectRatio"><div>
+      <noscript>
+        <picture>
+          <source srcset="https://dev-porcupine021.s3.amazonaws.com/alphajpg/img/test0.webp" type="image/webp">
+          <img src="https://dev-porcupine021.s3.amazonaws.com/alphajpg/img/test0.png" alt="Falcon">
+        </picture>
+      </noscript>
+    </div></div>
+
+    <br>
+    <div id="label">Using: &lt;picture&gt; (No Javascript)</div>
+
+    <script src="https://porcupine021.github.io/imgsupport/js/ImgSupport.js"></script>
+    <script src="../js/AlphaJpg-Canvas.js"></script>
+    <script>
+      var imgUrlBase = 'https://dev-porcupine021.s3.amazonaws.com/alphajpg/img/test0';
+
+      window.onload = function(){ // source-ignore delay execution so we can capture source before DOM is updated
+      ImgSupport.test(function(supports){
+        if(supports['webp-alpha']){
+          setImg(imgUrlBase+'.webp', 'WebP');
+        }
+        else{
+          AlphaJpg_Canvas.load(imgUrlBase+'.alpha.jpg', function(canvas){
+            if(canvas === false){
+              setImg(imgUrlBase+'.png', 'PNG');
+            }
+            else{
+              setImg(canvas, 'AlphaJpg');
+            }
+          });
+        }
+      });
+
+      function setImg(el, type){
+        var myImage = document.getElementById('myImage').childNodes[0],
+            label = document.getElementById('label'),
+            url;
+
+        if(typeof el === 'string'){
+          url = el;
+          el = new Image();
+          el.src = url;
+        }
+        myImage.appendChild(el);
+        label.innerHTML = 'Using: '+type;
+      }
+      } // source-ignore
+    </script>
+
+  </div>
+
+  <div id="source-overlay" class="modal-overlay">
+    <a id="source-close" class="close-bttn" href="javascript:void(0);" title="Close"></a>
+    <div id="source-body" class="modal-body">
+      <pre id="source-pre" class="prettyprint"></pre>
+    </div>
+  </div>
+
+  <div id="about-overlay" class="modal-overlay">
+    <a id="about-close" class="close-bttn" href="javascript:void(0);" title="Close"></a>
+    <div id="about-body" class="modal-body">
+      <div class="about-inner">
+        <h2>Description</h2>
+        This demo shows the basic usage of the
+        <a href="../js/AlphaJpg-Canvas.js" target="_blank" rel="noopener">AlphaJpg-Canvas.js</a>
+        library.  A specially crafted 
+        <a href="img/test0.alpha.jpg" target="_blank" rel="noopener">jpg image</a>
+        is loaded from the website's domain. It's alpha transparency is reconstructed 
+        using HTML5 canvas. The returned canvas element is attached to the DOM. 
+        The canvas is wrapped in two div elements and styled so that it behaves like 
+        a responsive image.<br>
+        <h2>Support</h2>
+        This technique requires Javascript and browser 
+        <a href="https://caniuse.com/#feat=canvas" target="_blank" rel="noopener">canvas support</a>.
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/prettify.js"></script>
+  <script src="./js/demo.js"></script>
+
+</body>
+</html>
