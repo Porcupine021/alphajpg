@@ -84,17 +84,16 @@
     <div id="about-body" class="modal-body">
       <div class="about-inner">
         <h2>Description</h2>
-        This demo shows the basic usage of the
+        This "kitchen sink" demo shows an advanced production ready usage of the
         <a href="../js/AlphaJpg-Canvas.js" target="_blank" rel="noopener">AlphaJpg-Canvas.js</a>
-        library.  A specially crafted 
-        <a href="img/test0.alpha.jpg" target="_blank" rel="noopener">jpg image</a>
-        is loaded from the website's domain. It's alpha transparency is reconstructed 
-        using HTML5 canvas. The returned canvas element is attached to the DOM. 
-        The canvas is wrapped in two div elements and styled so that it behaves like 
-        a responsive image.<br>
+        library. When Javascript is disabled, a &lt;noscript&gt; tag is used to load a &lt;picture&gt;,
+        which delivers either a WebP or PNG version of the image.  If Javascript is enabled, it determines
+        whether to deliver a WebP image, an AlphaJpg reconstructed image, or a plain PNG file.
+        This technique offers broad browser support and allows for one to deliver the smallest image file
+        possible based on the browser's capabilities.
+        <br>
         <h2>Support</h2>
-        This technique requires Javascript and browser 
-        <a href="https://caniuse.com/#feat=canvas" target="_blank" rel="noopener">canvas support</a>.
+        This technique is supported everywhere.
       </div>
     </div>
   </div>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Firefox SVG feComposite Rendering Test 3</title>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body style="background-image: url(./img/checker.png); margin:0; padding:0; text-align:center;">
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 768 512" width="768" height="512">
+  <defs>
+    <filter id="myfilter" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="768" height="512">
+      <feImage xlink:href="./img/debug3-img1.png" result="img1"/>
+      <feImage xlink:href="./img/debug3-img2.png" result="img2"/>
+      <feComposite in="img1" in2="img2" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0"/>
+    </filter>
+  </defs>
+  <rect x="0" y="0" width="768" height="512" style="filter:url(#myfilter);"/>
+</svg>
+
+</body>
+</html>
