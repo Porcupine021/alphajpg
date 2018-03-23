@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Firefox SVG feComposite Rendering Test 5</title>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body style="background-image: url(./img/checker.png); margin:0; padding:0; text-align:center;">
+
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+	<defs>
+    <filter id="myfilter" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse" x="0" y="0" width="768" height="512">
+      <feFlood x="0" y="0" width="100%" height="100%" flood-color="#000000" flood-opacity="1.0" result="i1"/>
+      <feFlood x="0" y="0" width="100%" height="100%" flood-color="#ff0000" flood-opacity="1.0" result="i2"/>
+			<feComposite operator="arithmetic" k1="0" k2="-1" k3="1" k4="0.998" in="i1" in2="i2"/>
+		</filter>
+	</defs>
+	<rect x="0" y="0" width="200" height="200" filter="url(#myfilter)"/>
+</svg>
+
+</body>
+</html>
+<!--
+
+k1=0 k2=-1 k3=1 k4=0.998
+
+result = k1*i1*i2 + k2*i1 + k3*i2 + k4
+result = 0 + -1*i1 + 1*i2 + 0.998
+result = i2 - i1 + 0.998
+
+i1 = rgba(0, 0, 0, 1.0)
+i2 = rgba(1.0, 0, 0, 1.0)
+
+r = r2 - r1 + 0.998 = 1.0 - 0 + 0.998 = 0.002
+g = g2 - g1 + 0.998 = 0 - 0 + 0.998 = -0.998
+b = b2 - b1 + 0.998 = 0 - 0 + 0.998 = -0.998
+a = a2 - a1 + 0.998 = 1.0 - 1.0 + 0.998 = -0.998
+
+rgba(0.002, -0.998, -0.998, -0.998) // pre-clamping values
+
+-->
