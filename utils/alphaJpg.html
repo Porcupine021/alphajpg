@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>AlphaJpg Converter Utility</title>
+<title>AlphaJpg Converter</title>
 <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
 <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
 <style>
@@ -44,6 +44,11 @@ html {
 	-ms-overflow-style: -ms-autohiding-scrollbar;
 	-ms-touch-action: manipulation;
 	touch-action: manipulation;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 svg:not(:root) {
   overflow: hidden;
@@ -54,7 +59,6 @@ svg {
 	pointer-events: none;
 }
 
-
 .drop-zone {
   position: absolute;
   top: 0;
@@ -63,6 +67,7 @@ svg {
   bottom: 0;
   background-color: #c7e7ec; 
   transition: background-color 150ms ease-in-out;
+  overflow: hidden;
 }
 .drop-zone__table {
   display: table;
@@ -84,7 +89,6 @@ svg {
 }
 .drop-zone__td * {
   position: relative;
-  z-index: 1;
 }
 .drop-zone__border {
   position: absolute;
@@ -94,7 +98,7 @@ svg {
   right: 1em;
   border: 2px dashed rgba(0,0,0,0.5);
   border-radius: 1em;
-  z-index: 0;
+  z-index: 1;
 }
 .drop-zone__body {
   font-size: 2em;
@@ -111,7 +115,7 @@ svg {
 }
 .drop-zone__label {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   cursor: pointer;
   font-weight: bold;
   white-space: nowrap;
@@ -136,9 +140,54 @@ svg {
   left: 0%;
   opacity: 1;
 }
+.drop-zone__file {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
 
 .drop-zone__drag-note {
   white-space: nowrap;
+}
+
+@keyframes arrow-bounce {
+  0% { transform: translateY(0%); }
+  100% { transform: translateY(-20%); }
+}
+
+
+.icon-drop-file-arrow,
+.icon-drop-file-box {
+  position: relative;
+  display: block;
+  width: 100px;
+  height: 100px;
+  fill: rgba(0,0,0,0.5);
+  margin: 0 auto;
+}
+.icon-drop-file-box {
+  margin-top: -100px;
+}
+.icon-drop-file-arrow {
+  will-change: transform;
+}
+
+.icon-alert {
+  display: inline-block;
+  width: 70px;
+  height: 64px;
+  fill: #ff0000;
+}
+
+.icon-x {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  fill: #fff;
 }
 
 .is-dragover .drop-zone {
@@ -147,19 +196,13 @@ svg {
 .is-dragover .drop-zone__label {
   text-shadow: -2px 0px 0 #cbecc7, 2px 0px 0 #cbecc7, -2px -2px 0 #cbecc7, 0px -2px 0 #cbecc7, 0px 2px 0 #cbecc7;
 }
-
-.icon-drop-file {
-  display: block;
-  width: 100%;
-  height: 100px;
-  fill: rgba(0,0,0,0.5);
-}
-
-.icon-alert {
-  display: inline-block;
-  width: 70px;
-  height: 64px;
-  fill: #ff0000;
+.is-dragover .icon-drop-file-arrow {
+  animation-name: arrow-bounce;
+  animation-duration: 400ms;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+  animation-fill-mode: none;
 }
 
 .modal {
@@ -170,6 +213,9 @@ svg {
   bottom: 0;
   z-index: 100;
   background-color: rgba(0,0,0,0.8);
+  will-change: transform;
+  transform: scale(0);
+  opacity: 0;
 }
 .modal__table {
   display: table;
@@ -196,9 +242,39 @@ svg {
   background-color: #fff;
   max-width: 640px;
   border-radius: 1em;
-  box-shadow: 0px 0px 64px 0px;
+  box-shadow: 0px 0px 64px 0px #000;
   margin: 1em;
 }
+.modal__close {
+  position: absolute;
+  display: block;
+  appearance: none;
+  width: 2em; 
+  height: 2em;
+  top: 4px;
+  right: 4px;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+  background-color: transparent;
+
+  vertical-align: middle;
+  text-align: center;
+}
+.modal__close svg {
+  fill: rgba(0,0,0,0.6);
+  transition: fill 150ms ease-in-out;
+}
+.modal__close:hover svg {
+  fill: rgba(0,0,0,0.9);
+}
+.modal__close--white svg {
+  fill: rgba(255,255,255,0.6);
+}
+.modal__close--white:hover svg {
+  fill: rgba(255,255,255,0.9);
+}
+
 .modal__container h1 {
   font-size: 2em;
   font-weight: bold;
@@ -208,48 +284,140 @@ svg {
   font-size: 1.6em;
 }
 
+.modal.invisible {
+  animation-name: modal-disappear;
+  animation-duration: 200ms;
+  animation-direction: normal;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+.modal.visible {
+  animation-name: modal-appear;
+  animation-duration: 200ms;
+  animation-direction: normal;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+}
+@keyframes modal-appear {
+  0% { 
+    display: none;
+    transform: scale(0);
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% { 
+    display: block;
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes modal-disappear {
+  0% { 
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+  }
+  99% {
+    display: block;
+    opacity: 0;
+    transform: scale(2);
+  }
+  100% { 
+    display: none;
+    opacity: 0;
+    transform: scale(0);
+  }
+}
 
+.preview-img {
+  display: block;
+  margin: 0 auto;
+}
+.preview-modal__note {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(255,255,255,0.9);
+  padding: 0.5em 1em;
+  color: #000;
+  box-shadow: 0 0 1em rgba(0,0,0,0.8);
+}
 </style>
 </head>
 <body>
 
   <div id="drop-zone" class="drop-zone">
+
     <div class="drop-zone__table">
       <div class="drop-zone__tr">
-        <div id="foo" class="drop-zone__td">
+        <div class="drop-zone__td">
           <div class="drop-zone__border"></div>
-
-          <svg class="icon-drop-file" viewBox="0 0 100 100"><path d="M95.512 64.078a4.494 4.494 0 0 0-4.488 4.5V91H8.976V68.578c0-2.485-2.009-4.5-4.488-4.5A4.494 4.494 0 0 0 0 68.578V95.5c0 2.485 2.009 4.5 4.488 4.5H95.25c.044 0 .085-.012.129-.013.045.001.087.013.132.013a4.494 4.494 0 0 0 4.488-4.5V68.578a4.492 4.492 0 0 0-4.487-4.5z"/><path d="M81.517 47.932a4.48 4.48 0 0 0-6.345-.182L54.488 67.336V4.5C54.488 2.015 52.479 0 50 0s-4.488 2.015-4.488 4.5v63.083L24.566 47.75a4.48 4.48 0 0 0-6.345.182 4.508 4.508 0 0 0 .181 6.361l28.334 26.83a4.443 4.443 0 0 0 2.874 1.204c.086.006.171.016.258.017.087-.001.172-.011.258-.017A4.443 4.443 0 0 0 53 81.123l28.334-26.83a4.506 4.506 0 0 0 .183-6.361z"/></svg>
-
+          <label for="drop-zone-file" class="icon-drop-file-arrow"><svg class="icon-drop-file-arrow" viewBox="0 0 100 100"><path d="M81.517 47.932a4.48 4.48 0 0 0-6.345-.182L54.488 67.336V4.5C54.488 2.015 52.479 0 50 0s-4.488 2.015-4.488 4.5v63.083L24.566 47.75a4.48 4.48 0 0 0-6.345.182 4.508 4.508 0 0 0 .181 6.361l28.334 26.83a4.443 4.443 0 0 0 2.874 1.204c.086.006.171.016.258.017.087-.001.172-.011.258-.017A4.443 4.443 0 0 0 53 81.123l28.334-26.83a4.506 4.506 0 0 0 .183-6.361z"/></svg></label>
+          <label for="drop-zone-file" class="icon-drop-file-box"><svg class="icon-drop-file-box" viewBox="0 0 100 100"><path d="M95.512 64.078a4.494 4.494 0 0 0-4.488 4.5V91H8.976V68.578c0-2.485-2.009-4.5-4.488-4.5A4.494 4.494 0 0 0 0 68.578V95.5c0 2.485 2.009 4.5 4.488 4.5H95.25c.044 0 .085-.012.129-.013.045.001.087.013.132.013a4.494 4.494 0 0 0 4.488-4.5V68.578a4.492 4.492 0 0 0-4.487-4.5z"/></svg></label>
           <div class="drop-zone__body">
-            <label class="drop-zone__label">Choose an image</label>
-            <span class="drop-zone__drag-note">or drag it here.</span>
+            <label for="drop-zone-file" class="drop-zone__label">Choose an image</label>
+            <span id="drop-zone-note" class="drop-zone__drag-note">or drag it here.</span>
+            <input type="file" id="drop-zone-file" class="drop-zone__file" accept="image/*" />
           </div>
-
           <div class="drop-zone__note">
             Images are manipulated in the browser. Files are not uploaded to an external server.
           </div>
-
         </div>
       </div>
     </div>
-  </div>
 
-  <noscript>
-  <div class="modal">
-    <div class="modal__table">
-      <div class="modal__tr">
-        <div class="modal__td">
-          <div class="modal__container">
-            <svg class="icon-alert" viewBox="0 0 100 91"><path d="M50 61.91a4.493 4.493 0 0 0 4.485-4.5V36.7c0-2.485-2.008-4.5-4.485-4.5a4.493 4.493 0 0 0-4.485 4.5v20.71c0 2.485 2.008 4.5 4.485 4.5z"/><ellipse cx="50" cy="69.868" rx="4.759" ry="4.775"/><path d="M86.523 90.735H13.477c-4.864 0-9.22-2.523-11.653-6.75s-2.432-9.273 0-13.5l36.524-63.47C40.78 2.789 45.136.265 50 .265c4.865 0 9.221 2.523 11.653 6.75l36.523 63.469c2.431 4.227 2.431 9.273-.001 13.5-2.431 4.227-6.787 6.751-11.652 6.751zM50 9.265c-.778 0-2.716.219-3.884 2.25L9.592 74.985c-1.168 2.03-.389 3.823 0 4.5s1.547 2.25 3.884 2.25h73.046c2.338 0 3.495-1.573 3.885-2.25s1.169-2.47 0-4.5l-36.523-63.47c-1.168-2.03-3.105-2.25-3.884-2.25z"/></svg>
-            <h1>Uh oh!</h1>
-            <span>Javascript is disabled. Please enable it to use this tool.</span>
+    <div id="preview-modal" class="modal">
+      <div class="modal__table">
+        <div class="modal__tr">
+          <div class="modal__td">
+            <img id="preview-img" class="preview-img" src="" alt="" />
+            <div class="preview-modal__note">
+              Right click or tap and hold to save this image. Use your 
+              tool of choice to convert and compress it to a JPG file.
+            </div>
+            <button id="preview-modal__close" class="modal__close modal__close--white"><svg viewBox="0 0 50 50"><path d="M25 0C11.2 0 0 11.2 0 25s11.2 25 25 25 25-11.2 25-25S38.8 0 25 0zm13.3 38.2c-1.7 1.8-4.5 1.8-6.3.1l-7-7-6.8 6.8c-.8.9-2 1.4-3.3 1.5-2.5 0-4.4-2-4.4-4.4 0-1.2.5-2.4 1.5-3.3l6.8-6.8-6.8-6.8c-.9-.8-1.5-2-1.5-3.3 0-2.5 2-4.4 4.4-4.4 1.2 0 2.4.5 3.3 1.5l6.8 6.8 7-7c1.7-1.6 4.4-1.6 6.1 0 1.8 1.7 1.8 4.5.1 6.3l-7 7 7 7c1.8 1.5 1.8 4.3.1 6z"/></svg></button>
           </div>
         </div>
       </div>
     </div>
+
+    <div id="modal" class="modal">
+      <div class="modal__table">
+        <div class="modal__tr">
+          <div class="modal__td">
+            <div id="modal__container" class="modal__container">
+              <button id="modal__close" class="modal__close"><svg viewBox="0 0 50 50"><path d="M25 0C11.2 0 0 11.2 0 25s11.2 25 25 25 25-11.2 25-25S38.8 0 25 0zm13.3 38.2c-1.7 1.8-4.5 1.8-6.3.1l-7-7-6.8 6.8c-.8.9-2 1.4-3.3 1.5-2.5 0-4.4-2-4.4-4.4 0-1.2.5-2.4 1.5-3.3l6.8-6.8-6.8-6.8c-.9-.8-1.5-2-1.5-3.3 0-2.5 2-4.4 4.4-4.4 1.2 0 2.4.5 3.3 1.5l6.8 6.8 7-7c1.7-1.6 4.4-1.6 6.1 0 1.8 1.7 1.8 4.5.1 6.3l-7 7 7 7c1.8 1.5 1.8 4.3.1 6z"/></svg></button>
+              <svg class="icon-alert" viewBox="0 0 100 91"><path d="M50 61.91a4.493 4.493 0 0 0 4.485-4.5V36.7c0-2.485-2.008-4.5-4.485-4.5a4.493 4.493 0 0 0-4.485 4.5v20.71c0 2.485 2.008 4.5 4.485 4.5z"/><ellipse cx="50" cy="69.868" rx="4.759" ry="4.775"/><path d="M86.523 90.735H13.477c-4.864 0-9.22-2.523-11.653-6.75s-2.432-9.273 0-13.5l36.524-63.47C40.78 2.789 45.136.265 50 .265c4.865 0 9.221 2.523 11.653 6.75l36.523 63.469c2.431 4.227 2.431 9.273-.001 13.5-2.431 4.227-6.787 6.751-11.652 6.751zM50 9.265c-.778 0-2.716.219-3.884 2.25L9.592 74.985c-1.168 2.03-.389 3.823 0 4.5s1.547 2.25 3.884 2.25h73.046c2.338 0 3.495-1.573 3.885-2.25s1.169-2.47 0-4.5l-36.523-63.47c-1.168-2.03-3.105-2.25-3.884-2.25z"/></svg>
+              <h1>Uh oh!</h1>
+              <span id="modal__msg"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <noscript>
+    <div class="modal visible">
+      <div class="modal__table">
+        <div class="modal__tr">
+          <div class="modal__td">
+            <div class="modal__container">
+              <svg class="icon-alert" viewBox="0 0 100 91"><path d="M50 61.91a4.493 4.493 0 0 0 4.485-4.5V36.7c0-2.485-2.008-4.5-4.485-4.5a4.493 4.493 0 0 0-4.485 4.5v20.71c0 2.485 2.008 4.5 4.485 4.5z"/><ellipse cx="50" cy="69.868" rx="4.759" ry="4.775"/><path d="M86.523 90.735H13.477c-4.864 0-9.22-2.523-11.653-6.75s-2.432-9.273 0-13.5l36.524-63.47C40.78 2.789 45.136.265 50 .265c4.865 0 9.221 2.523 11.653 6.75l36.523 63.469c2.431 4.227 2.431 9.273-.001 13.5-2.431 4.227-6.787 6.751-11.652 6.751zM50 9.265c-.778 0-2.716.219-3.884 2.25L9.592 74.985c-1.168 2.03-.389 3.823 0 4.5s1.547 2.25 3.884 2.25h73.046c2.338 0 3.495-1.573 3.885-2.25s1.169-2.47 0-4.5l-36.523-63.47c-1.168-2.03-3.105-2.25-3.884-2.25z"/></svg>
+              <h1>Uh oh!</h1>
+              <span>Javascript is disabled. Please enable it to use this tool.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </noscript>
+
   </div>
-  </noscript>
 
 <script>
 /*
@@ -272,6 +440,163 @@ typeof define&&define.amd?define(function(){return s?f:e}):s||(t.Promise=e);var 
 Object.prototype.toString.call(a))throw new TypeError("You must pass an array to Promise.all().");return new this(function(b,c){function h(a){e++;return function(c){d[a]=c;--e||b(d)}}for(var d=[],e=0,f=0,g;f<a.length;f++)(g=a[f])&&"function"===typeof g.then?g.then(h(f),c):d[f]=g;e||b(d)})};e.race=function(a){if("[object Array]"!==Object.prototype.toString.call(a))throw new TypeError("You must pass an array to Promise.race().");return new this(function(b,c){for(var e=0,d;e<a.length;e++)(d=a[e])&&"function"===
 typeof d.then?d.then(b,c):b(d)})};e.resolve=function(a){return a&&"object"===typeof a&&a.constructor===this?a:new this(function(b){b(a)})};e.reject=function(a){return new this(function(b,c){c(a)})}})("undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this);
 
+/**
+ * A lightweight interface for searching the DOM for elements. Similarities to jQuery.
+ * 
+ * @param {String} selector The CSS selector to search against
+ * @param {Object} context (Optional) An optional DOM element reference to search below
+ * @returns {Array} An array of DOM Elements
+ */
+function $$(selector, context) {
+  context = context || document;
+  var elements = context.querySelectorAll(selector),
+      els = [],
+      i;
+  for(i = 0; i < elements.length; i++){
+    els.push(elements[i]);
+  }
+  return els;
+} 
+
+/**
+  * Returns a function, that, as long as it continues to be invoked, will not
+  * be triggered. The function will be called after it stops being called for
+  * N milliseconds. 
+  * 
+  * @see http://davidwalsh.name/javascript-debounce-function
+  * @param {Function} func The function to debounce.
+  * @param {Number} wait The number of milliseconds after it stops being called.
+  * @param {Bool} immediate If `immediate` is passed, trigger the function on the leading edge, instead of the trailing.
+  * @returns {Function}
+  */
+function debounce(func, wait, immediate){
+  var timeout;
+  return function(){
+    var context = this, args = arguments;
+    var later = function(){
+      timeout = null;
+      if(!immediate){
+        func.apply(context, args);
+      }
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if(callNow){
+      func.apply(context, args);
+    }
+  };
+}
+
+/**
+* Cross browser method for attaching an event handler to an element
+* 
+* @param {Object} el The HTML DOM Element
+* @param {String} event The name of the event to attach (Ex: 'click').
+* @param {Function} handler The event handler to attach
+* @param {Bool} isPassive (Optional) Marks the event as passive (in supported browsers)
+* @returns {void}
+*/
+function addEvent(el, event, handler){
+  var isPassive = arguments.length > 3 ? !!(arguments[3]) : false,
+      passiveSupported = false,
+      options;
+
+  try {
+    options = Object.defineProperty({}, "passive", {
+      get: function() {
+        passiveSupported = true;
+      }
+    });
+
+    window.addEventListener("test", null, options);
+  } catch(err) {}
+
+  if(isPassive && passiveSupported){
+    isPassive = {passive: true};
+  }
+
+  if(el.addEventListener){
+    el.addEventListener(event, handler, isPassive); 
+  }
+  else if(el.attachEvent){
+    el.attachEvent('on'+event, handler);
+  }
+}
+
+/**
+* Cross browser method for detaching an event handler from an element
+* 
+* @param {Object} el The HTML DOM Element
+* @param {String} event The name of the event to detach (Ex: 'click').
+* @param {Function} handler The event handler to detach
+* @returns {void}
+*/
+function removeEvent(el, event, handler){
+  if(el.removeEventListener){
+    el.removeEventListener(event, handler, false); 
+  }
+  else if(el.detachEvent){
+    el.detachEvent('on'+event, handler);
+  }
+}
+
+/**
+  * Tests whether a DOM Element has a specified CSS class name.
+  * 
+  * @param {Object} el A DOM Element
+  * @param {String} className The name of a CSS class name
+  * @returns {Boolean}
+  */
+function hasClassName(el, className){
+  if(typeof el.className !== 'string'){
+    return false;
+  }
+
+  var classes = el.className.replace(/^\s+/,'').replace(/\s+$/,'').replace(/\s+/g, ' ').split(' '),
+      i;
+
+  for(i = 0; i < classes.length; i++){
+    if(classes[i] === className){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Remove a css class from an element
+ * 
+ * @param {Object} el The DOMElement to remove the css class from
+ * @param {String} className The name of the css class
+ * @returns {void}
+ */
+function removeClass(el, className){
+  var rx = new RegExp('\\b'+className.replace(/\-/g, '\\-')+'\\b', 'g');
+  el.className = el.className.replace(rx, '');
+}
+
+/**
+  * Gets the height of the browser's content area.
+  * 
+  * @returns {Number} The browser window's height in pixels
+  */
+function getWinHeight(){
+  var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+  return isNaN(parseInt(h)) ? 0 : h;
+}
+
+/**
+  * Gets the width of the browser's content area.
+  * 
+  * @returns {Number} The browser window's width in pixels
+  */
+function getWinWidth(){
+  var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 0;
+  return isNaN(parseInt(w)) ? 0 : w;
+}
+
 
 var supports = {};
 var html = document.getElementsByTagName('HTML')[0];
@@ -280,33 +605,98 @@ function init(){
 
   supports = initSupport();
 
-  // prevent default behavior of all drag events
-  html.addEventListener('drag', cancelEvent);
-  html.addEventListener('dragstart', cancelEvent);
-  html.addEventListener('dragend', cancelEvent);
-  html.addEventListener('dragover', cancelEvent);
-  html.addEventListener('dragenter', cancelEvent);
-  html.addEventListener('dragleave', cancelEvent);
-  html.addEventListener('drop', cancelEvent);
+  // hide drag/drop verbiage if not supported
+  if(supports.isMobile || !supports.dragFile){
+    $$('#drop-zone-note')[0].style.display = 'none';
+  }
 
-  html.addEventListener('dragover', onDragOver);
-  html.addEventListener('dragenter', onDragOver);
+  // warn user if their browser isn't supported
+  if(!supports.imgPreview){
+    showError("Your browser isn't supported. Try using this tool on a modern browser.");
+  }
 
-  html.addEventListener('dragleave', onDragOut);
-  html.addEventListener('dragend', onDragOut);
-  html.addEventListener('drop', onDragOut);
+  // drag drop events
+  addEvent(html, 'drag', cancelEvent);
+  addEvent(html, 'dragstart', cancelEvent);
+  addEvent(html, 'dragend', cancelEvent);
+  addEvent(html, 'dragover', cancelEvent);
+  addEvent(html, 'dragenter', cancelEvent);
+  addEvent(html, 'dragleave', cancelEvent);
+  addEvent(html, 'drop', cancelEvent);
 
-  html.addEventListener('drop', onDrop);
+  addEvent(html, 'dragover', onDragOver);
+  addEvent(html, 'dragenter', onDragOver);
+  addEvent(html, 'dragleave', onDragOut);
+  addEvent(html, 'dragend', onDragOut);
+  addEvent(html, 'drop', onDragOut);
+  addEvent(html, 'drop', onDrop);
 
+  addEvent(document.body, 'keyup', onKeyUpBody);
+  addEvent($$('#modal__close')[0], 'click', hideError);
+  addEvent($$('#modal')[0], 'mousedown', hideError);
+  addEvent($$('#modal__container')[0],'mousedown', cancelEvent);
+
+  addEvent($$('#preview-modal__close')[0], 'click', hidePreview);
+  addEvent($$('#preview-modal')[0], 'mousedown', hidePreview);
+  addEvent($$('#preview-img')[0],'mousedown', cancelEvent);
+
+  addEvent($$('#drop-zone-file')[0], 'change', onFileChange);
+
+  addEvent(window, 'resize', debounce(onResizeWindow, 200));
 }
 
-function onDragOver(){
+function onResizeWindow(_w, _h){
+  var img = $$('#preview-img')[0],
+      imgW = img.naturalWidth ? img.naturalWidth : (img.width ? img.width : 0),
+      imgH = img.naturalHeight ? img.naturalHeight : (img.height ? img.height : 0),
+      winW = getWinWidth(),
+      winH = getWinHeight(),
+      padding = 16,
+      aspectRatio, w, h;
+
+  if(typeof _w === 'number' && typeof _h === 'number'){
+    imgW = _w;
+    imgH = _h;
+  }
+
+  if(!(imgW && imgH && winW && winH)){
+    return;
+  }
+
+  winW -= padding * 2;
+  winH -= padding * 2;
+
+  aspectRatio = imgW / imgH;
+
+  w = winW;
+  h = winW / aspectRatio;
+
+  if(w > winW || h > winH){
+    h = winH;
+    w = winH * aspectRatio;
+  }
+
+  // don't upscale the image
+  if(w > imgW){
+    w = imgW;
+    h = w / aspectRatio;
+  }
+  else if(h > imgH){
+    h = imgH;
+    w = h * aspectRatio;
+  }
+
+  img.width = w;
+  img.height = h;
+}
+
+function onDragOver(evt){
   if(html.className.indexOf('is-dragover') === -1){
     html.className += ' is-dragover';
   }
 }
 
-function onDragOut(){
+function onDragOut(evt){
   html.className = html.className.replace(/ is\-dragover/g, '');
 }
 
@@ -322,44 +712,44 @@ function initSupport(){
 
   // feature detection
   supports.canvas     = !!(canvas.getContext && canvas.getContext('2d'));
+  supports.toDataURL  = (typeof canvas.toDataURL === 'function');
   supports.formData   = !!(window.FormData);
   supports.file       = !!(window.File);
   supports.fileReader = !!(window.FileReader);
   supports.fileList   = !!(window.FileList);
   supports.url        = !!(window.URL);
   supports.dragdrop   = ('draggable' in div) || ('ondragstart' in div && 'ondrop' in div);
-  supports.imgPreview = (supports.canvas && (supports.url || supports.fileReader));
+  supports.imgPreview = (supports.canvas && supports.toDataURL && (supports.url || supports.fileReader));
   supports.dragFile   = supports.dragdrop && supports.formData && supports.fileReader;
+  supports.isMobile   = /(android|iPhone|iPod|iPad|webOS|blackberry|Windows Phone)/i.test(navigator.userAgent);
 
   return supports;
 }
 
-
 function onDrop(evt) {
-  console.log('File(s) dropped');
-
   var i, file;
 
   if(evt.dataTransfer.files && evt.dataTransfer.files.length === 0){
     removeDragData(evt);
-    console.log('No files detected on drop');
+    showError('No files detected on drop.');
     return;
   }
 
   // make sure only one file was dropped
   if(evt.dataTransfer.files && evt.dataTransfer.files.length > 1){
     removeDragData(evt);
-    console.log('Please choose a single file');
+    showError('Please drop one file at a time.');
     return;
   }
 
   file = evt.dataTransfer.files[0];
-  console.log(file);
 
   getCanvasFromFile(file).then(function(canvas){
-    console.log(canvas);
+    canvasToAlphaJpg(canvas, function(outCanvas){
+      showPreview(outCanvas);
+    });
   }, function(){
-    console.log('Failed to get canvas');
+    showError("That doesn't appear to be an image file.");
   });
 
   removeDragData(evt);
@@ -398,6 +788,44 @@ function getCanvasFromFile(file){
   });
 }
 
+function canvasToAlphaJpg(inCanvas, callback){
+  var inCtx = inCanvas.getContext('2d'),
+      outCanvas = document.createElement('CANVAS'),
+      outCtx = outCanvas.getContext('2d'),
+      useCreateImageBitmap = (!!navigator.userAgent.match(/(Android)/ig) && typeof window.createImageBitmap === 'function'),
+      w = inCanvas.width,
+      h = inCanvas.height,
+      pixels, i, len, alpha
+  ;
+
+  outCanvas.width = w;
+  outCanvas.height = h * 2;
+
+  outCtx.fillStyle = '#000000';
+  outCtx.rect(0, 0, w, h);
+  outCtx.fill();
+  outCtx.drawImage(inCanvas, 0, 0, w, h); 
+
+  pixels = inCtx.getImageData(0, 0, w, h);
+  len = pixels.data.length;
+  for(i = 0; i < len; i += 4){
+    alpha = pixels.data[i+3];
+    pixels.data[i+0] = pixels.data[i+1] = pixels.data[i+2] = alpha;
+    pixels.data[i+3] = 255;
+  }
+
+  if(useCreateImageBitmap){
+    createImageBitmap(pixels).then(function(bitmap){
+      outCtx.drawImage(bitmap, 0, h);
+      callback(outCanvas);
+    });
+  }
+  else{
+    outCtx.putImageData(pixels, 0, h);
+    callback(outCanvas);
+  }
+}
+
 function removeDragData(evt){
   if(evt.dataTransfer.items){
     evt.dataTransfer.items.clear();
@@ -405,6 +833,148 @@ function removeDragData(evt){
   else{
     evt.dataTransfer.clearData();
   }
+}
+
+function onKeyUpBody(evt){
+  var code = evt.keyCode ? evt.keyCode : (evt.which ? evt.which : 0);
+  if(code === 27){
+    hideError();
+    hidePreview();
+  }
+}
+
+function showError(msg){
+  var modal = $$('#modal')[0],
+      msgEl = $$('#modal__msg')[0];
+
+  msgEl.innerHTML = msg;
+
+  if(hasClassName(modal, 'visible')){
+    return;
+  }
+  if(hasClassName(modal, 'invisible')){
+    modal.className = modal.className.replace(/ invisible/g, ' visible');
+  }
+  else{
+    modal.className += ' visible';
+  }
+}
+
+function hideError(){
+  var modal = $$('#modal')[0];
+  if(hasClassName(modal, 'visible')){
+    modal.className = modal.className.replace(/ visible/g, ' invisible');
+  }
+}
+
+function showPreview(canvas){
+  var modal = $$('#preview-modal')[0],
+      img = $$('#preview-img')[0];
+
+  img.src = canvas.toDataURL();
+
+  setTimeout(function(){
+    onResizeWindow(canvas.width, canvas.height);
+
+    if(hasClassName(modal, 'visible')){
+      return;
+    }
+    if(hasClassName(modal, 'invisible')){
+      modal.className = modal.className.replace(/ invisible/g, ' visible');
+    }
+    else{
+      modal.className += ' visible';
+    }
+
+  }, 100);
+}
+
+function hidePreview(){
+  var modal = $$('#preview-modal')[0];
+  if(hasClassName(modal, 'visible')){
+    modal.className = modal.className.replace(/ visible/g, ' invisible');
+  }
+}
+
+function resetFileInput(){
+  var el = document.createElement('INPUT'),
+      currEl = $$('#drop-zone-file')[0];
+
+  el.type = 'file';
+  el.id = 'drop-zone-file';
+  el.className = 'drop-zone__file';
+  if(typeof el.setAttribute === 'function'){
+    el.setAttribute('accept', 'image/*');
+  }
+  
+  currEl.parentNode.insertBefore(el, currEl);
+  currEl.parentNode.removeChild(currEl);
+
+  addEvent($$('#drop-zone-file')[0], 'change', onFileChange);
+}
+
+function onFileChange(){
+  var input = $$('#drop-zone-file')[0];
+      filePath = input.value;
+
+  // so we don't see IE's floating text cursor
+  document.body.focus();
+
+  if(filePath === ''){ return; }
+
+  // make sure the file input has an image selected
+  // Android 4.4.4 mangles file names chosen from "Documents". Oddly, choosing "Camera" to supply the file works fine and the filename is correct.
+  if(!/\.(webp|tif|tiff|gif|png|jpg|jpeg)$/i.test(filePath) && !/\\image:/i.test(decodeURIComponent(filePath))){
+    showError("That doesn't appear to be an image file.");
+    return;
+  }
+
+  getFileInputCanvas(input).then(function(canvas){
+    canvasToAlphaJpg(canvas, function(outCanvas){
+      showPreview(outCanvas);
+    });
+    resetFileInput();
+  }, function(){
+    resetFileInput();
+    showError('Failed to open file.');
+  });
+}
+
+function getFileInputCanvas(fileInput){
+
+  return new Promise(function(resolve, reject){
+    var options = {canvas: true},
+        filename = '',
+        file;
+
+    // make sure we can get a reference to the file
+    if(!(fileInput.files && fileInput.files[0])){
+      reject(false);
+      return;
+    }
+
+    file = fileInput.files[0];
+    options.cover = true;
+
+    loadImage.parseMetaData(file, function(data){
+      if(data.exif){
+        options.orientation = data.exif.get('Orientation');
+      }
+
+      var result = loadImage(file, function(canvas){
+        if(isDomElement(canvas)){
+          resolve(canvas);
+        }
+        else{
+          reject(false);
+        }
+      }, options);
+
+      if(!result){
+        reject(false);
+      }
+    });
+  });
 }
 
 init();
