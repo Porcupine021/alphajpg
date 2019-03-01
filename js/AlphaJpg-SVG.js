@@ -60,8 +60,8 @@ var AlphaJpg_SVG = (function(){
    * @param {function} callback The callback function to be called once the finished image has been 
    *   reconstructed. The callback function will be passed a single argument which may be either boolean false
    *   (indicating an error has occurred) or a <svg> DOMElement.
-   * @param {bool} returnDataUrl (Optional) If true, the function will attempt to return the finished image
-   *   as a base64 encoded data uri. Ex. "data:image/png;base64,iVBORw0K...truncated"
+   * @param {bool} returnDataUrl (Optional) This flag is here so that the function interface matches the canvas and
+   *   webGL versions. This argument should be omitted or explicitely set to false.
    * @return {void}
    */
   var load = function(imgUrl, callback){

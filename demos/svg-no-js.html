@@ -43,22 +43,30 @@
     </div>
   </div>
 
-  <div id="about-overlay" class="modal-overlay">
+  <div id="about-overlay" class="modal-overlay" style="display:block;">
     <a id="about-close" class="close-bttn" href="javascript:void(0);" title="Close"></a>
     <div id="about-body" class="modal-body">
       <div class="about-inner">
+        <h2>Attention</h2>
+        This technique is <strong><em>experimental</em></strong>! It is not meant to be used on a
+        production website.
         <h2>Description</h2>
-        This demo shows the basic usage of the
-        <a href="../js/AlphaJpg-Canvas.js" target="_blank" rel="noopener">AlphaJpg-Canvas.js</a>
-        library.  A specially crafted 
+        This demo shows that it is possible to reconstruct a specially crafted 
         <a href="img/test0.alpha.jpg" target="_blank" rel="noopener">jpg image</a>
-        is loaded from the website's domain. It's alpha transparency is reconstructed 
-        using HTML5 canvas. The returned canvas element is attached to the DOM. 
-        The canvas is wrapped in two div elements and styled so that it behaves like 
+        with alpha transparency using a SVG Filter. No javascript is required.
+        The SVG is wrapped in two div elements and styled so that it behaves like 
         a responsive image.<br>
         <h2>Support</h2>
-        This technique requires Javascript and browser 
-        <a href="https://caniuse.com/#feat=canvas" target="_blank" rel="noopener">canvas support</a>.
+        This technique requires 
+        <a href="https://caniuse.com/#feat=svg-filters" target="_blank" rel="noopener">SVG Filter support</a>.
+        
+        <h2>Known Issues</h2>
+        <ul>
+          <li>Firefox renders visual artifacts when reconstructing the image. A 
+            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1441294" target="_blank" rel="noopener">bug report</a>
+            has been filed.
+          </li>
+        </ul>
       </div>
     </div>
   </div>
