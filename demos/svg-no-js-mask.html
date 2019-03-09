@@ -1,0 +1,75 @@
+<!doctype html>
+<html class="checker">
+<head>
+  <meta charset="utf-8">
+  <title>AlphaJpg (SVG no Javascript, Mask)</title>
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="./css/prettify.css">
+  <link rel="stylesheet" href="./css/sunburst.css">
+  <link rel="stylesheet" href="./css/screen.css">
+  <link href="https://fonts.googleapis.com/css?family=PT+Sans+Narrow" rel="stylesheet">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header__inner">
+      <a class="header__back-bttn bttn" href="index.html">Back</a>
+      <a id="about-open" href="javascript:void(0);" class="header__label">SVG Mask (No JS Required)<span class="header__icon" title="More Info"></span></a>
+      <a id="source-open" class="header__source-bttn bttn" href="javascript:void(0);">View Source</a>
+    </div>
+  </header>
+  <div id="source-code" class="app">
+
+    <div id="myImage" class="preserveAspectRatio"><div>
+      <svg viewBox="0 0 640 494" width="640" height="494">
+        <defs>
+          <mask id="alphajpg" x="0" y="0" width="640" height="494">
+            <image x="0" y="-494" width="640" height="988" xlink:href="./img/test0.alpha.jpg"/>
+          </mask>
+        </defs>
+        <image x="0" y="0" width="640" height="988" xlink:href="./img/test0.alpha.jpg" mask="url(#alphajpg)" />
+      </svg>
+    </div></div>  
+
+  </div>
+
+  <div id="source-overlay" class="modal-overlay">
+    <a id="source-close" class="close-bttn" href="javascript:void(0);" title="Close"></a>
+    <div id="source-body" class="modal-body">
+      <pre id="source-pre" class="prettyprint"></pre>
+    </div>
+  </div>
+
+  <div id="about-overlay" class="modal-overlay" style="display:block;">
+    <a id="about-close" class="close-bttn" href="javascript:void(0);" title="Close"></a>
+    <div id="about-body" class="modal-body">
+      <div class="about-inner">
+        <h2>Attention</h2>
+        This technique is <strong><em>experimental</em></strong>! It is not meant to be used on a
+        production website.
+        <h2>Description</h2>
+        This demo shows that it is possible to reconstruct a specially crafted 
+        <a href="img/test0.alpha.jpg" target="_blank" rel="noopener">jpg image</a>
+        with alpha transparency using a SVG Filter. No javascript is required.
+        The SVG is wrapped in two div elements and styled so that it behaves like 
+        a responsive image.<br>
+        <h2>Support</h2>
+        This technique requires 
+        <a href="https://caniuse.com/#feat=svg-filters" target="_blank" rel="noopener">SVG Filter support</a>.
+        
+        <h2>Known Issues</h2>
+        <ul>
+          <li>Firefox renders visual artifacts when reconstructing the image. A 
+            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1441294" target="_blank" rel="noopener">bug report</a>
+            has been filed.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/prettify.js"></script>
+  <script src="./js/demo.js"></script>
+
+</body>
+</html>
