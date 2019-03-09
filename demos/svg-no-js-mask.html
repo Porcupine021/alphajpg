@@ -44,26 +44,15 @@
     <a id="about-close" class="close-bttn" href="javascript:void(0);" title="Close"></a>
     <div id="about-body" class="modal-body">
       <div class="about-inner">
-        <h2>Attention</h2>
-        This technique is <strong><em>experimental</em></strong>! It is not meant to be used on a
-        production website.
         <h2>Description</h2>
         This demo shows that it is possible to reconstruct a specially crafted 
         <a href="img/test0.alpha.jpg" target="_blank" rel="noopener">jpg image</a>
-        with alpha transparency using a SVG Filter. No javascript is required.
+        with alpha transparency using a SVG mask. No javascript is required.
         The SVG is wrapped in two div elements and styled so that it behaves like 
         a responsive image.<br>
         <h2>Support</h2>
         This technique requires 
-        <a href="https://caniuse.com/#feat=svg-filters" target="_blank" rel="noopener">SVG Filter support</a>.
-        
-        <h2>Known Issues</h2>
-        <ul>
-          <li>Firefox renders visual artifacts when reconstructing the image. A 
-            <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1441294" target="_blank" rel="noopener">bug report</a>
-            has been filed.
-          </li>
-        </ul>
+        <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/mask" target="_blank" rel="noopener">SVG <code>&lt;mask&gt;</code> support</a>.
       </div>
     </div>
   </div>
